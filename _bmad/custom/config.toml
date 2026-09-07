@@ -1,0 +1,35 @@
+# ═══════════════════════════════════════════════════════════════════
+# FotoBook — Configuração da Equipe
+# ═══════════════════════════════════════════════════════════════════
+# Overrides da configuração do _bmad/config.toml.
+# Commitado ao repo — aplica a todos os desenvolvedores do projeto.
+
+[core]
+project_name = "fotobook"
+document_output_language = "Português do Brasil"
+output_folder = "_bmad-output"
+
+[project]
+description = "Aplicação Web para Registro de Fotos Pessoais com upload simples e direto"
+primary_user = "Vânia Rodrigues"
+developer_manager = "Humberto Santos"
+repository = "https://github.com/hsoservicos/fotobook"
+
+[stack]
+framework = "Next.js"
+version = "15.x"
+ui_library = "React 19"
+css_framework = "Tailwind CSS 4.x"
+language = "TypeScript 5.x"
+runtime = "Node.js >= 20.12"
+storage = "Local (uploads/)"
+deploy = "Coolify 4.3.14"
+
+[agents.bmad-agent-pm]
+description = "Foco no usuário Vânia — upload de fotos simples e direto, sem complexidade desnecessária. Prioriza usabilidade e experiência do usuário."
+
+[agents.bmad-agent-architect]
+description = "Arquitetura simples e escalável para gerenciamento de fotos. Next.js App Router com uploads locais e possibilidade futura de migração para cloud storage."
+
+[agents.bmad-agent-dev]
+description = "Implementação test-first, responsiva, otimizada para upload de imagens. Performance e UX são prioridades."

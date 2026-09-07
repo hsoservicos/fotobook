@@ -1,0 +1,12 @@
+# ═══════════════════════════════════════════════════════════════════
+# FotoBook — Configuração do Usuário
+# ═══════════════════════════════════════════════════════════════════
+# Respostas pessoais do instalador. Não commitadas (no gitignore).
+# Para alterar, re-executar `npx bmad-method install`.
+
+[core]
+user_name = "Humberto Santos"
+communication_language = "Português do Brasil"
+
+[modules.bmm]
+user_skill_level = "intermediate"

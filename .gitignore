@@ -1,0 +1,52 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Coding agents — personal / machine-local overrides (keep shared configs tracked)
+.claude/settings.local.json
+_bmad/render/
+
+# Node
+node_modules/
+npm-debug.log*
+.next/
+out/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Rust
+target/
+
+# Logs
+*.log
+logs/
+
+# Temp
+tmp/
+.tmp/
+
+# Secrets (nunca committar!)
+.env
+.env.local
+*.pem
+*.key
+
+# Uploads (dados do usuário - não commitar)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Build
+dist/
+build/
