@@ -13,14 +13,15 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("q")?.toLowerCase();
     const tag = searchParams.get("tag")?.toLowerCase();
     const sortBy = searchParams.get("sort") || "newest";
-    const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "50", 10);
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "50", 10) || 50));
     const albumId = searchParams.get("albumId");
 
     const where: Record<string, unknown> = { userId: user.userId };
     if (albumId) where.albumId = albumId;
 
-    const photos = await db.photo.findMany({
+    // Fetch all matching photos for client-side filtering (acceptable for < 1000 photos)
+    const allPhotos = await db.photo.findMany({
       where,
       orderBy:
         sortBy === "oldest"
@@ -30,12 +31,10 @@ export async function GET(request: NextRequest) {
             : sortBy === "size"
               ? { size: "desc" }
               : { uploadedAt: "desc" },
-      skip: (page - 1) * limit,
-      take: limit,
     });
 
-    // Apply client-side filters for search/tag since Prisma doesn't do full-text on arrays easily
-    let filtered = photos;
+    // Apply client-side filters for search/tag
+    let filtered = allPhotos;
     if (search) {
       filtered = filtered.filter(
         (p) =>
@@ -50,10 +49,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const total = await db.photo.count({ where });
+    // Paginate filtered results
+    const total = filtered.length;
+    const offset = (page - 1) * limit;
+    const paginated = filtered.slice(offset, offset + limit);
 
     return NextResponse.json({
-      photos: filtered.map((p) => ({
+      photos: paginated.map((p) => ({
         ...p,
         url: `/uploads/${p.userId}/${p.filename}`,
       })),

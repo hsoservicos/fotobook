@@ -145,13 +145,14 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Unlink photos from album before deleting
-    await db.photo.updateMany({
-      where: { albumId: id },
-      data: { albumId: null },
+    // Unlink photos from album before deleting (atomic transaction)
+    await db.$transaction(async (tx) => {
+      await tx.photo.updateMany({
+        where: { albumId: id },
+        data: { albumId: null },
+      });
+      await tx.album.delete({ where: { id } });
     });
-
-    await db.album.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (error) {

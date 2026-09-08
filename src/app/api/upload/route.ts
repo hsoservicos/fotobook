@@ -15,8 +15,17 @@ const ALLOWED_TYPES = [
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 
-function generateFilename(originalName: string): string {
-  const ext = originalName.split(".").pop()?.toLowerCase() || "jpg";
+const MIME_TO_EXT: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/gif": "gif",
+  "image/webp": "webp",
+  "image/heic": "heic",
+  "image/heif": "heif",
+};
+
+function generateFilename(originalName: string, mimeType: string): string {
+  const ext = MIME_TO_EXT[mimeType] || originalName.split(".").pop()?.toLowerCase() || "jpg";
   return `${randomUUID()}.${ext}`;
 }
 
@@ -28,7 +37,7 @@ function sanitizeFilename(filename: string): string {
 }
 
 function validateImageMagicBytes(buffer: Buffer, mimeType: string): boolean {
-  if (buffer.length < 4) return false;
+  if (buffer.length < 12) return false;
 
   const signatures: Record<string, number[][]> = {
     "image/jpeg": [[0xff, 0xd8, 0xff]],
@@ -38,11 +47,20 @@ function validateImageMagicBytes(buffer: Buffer, mimeType: string): boolean {
   };
 
   const expected = signatures[mimeType];
-  if (!expected) return true; // HEIC/HEIF — skip validation
+  if (expected) {
+    return expected.some((sig) =>
+      sig.every((byte, i) => buffer[i] === byte)
+    );
+  }
 
-  return expected.some((sig) =>
-    sig.every((byte, i) => buffer[i] === byte)
-  );
+  // HEIC/HEIF validation: check ftyp box at offset 4-11
+  if (mimeType === "image/heic" || mimeType === "image/heif") {
+    const ftyp = buffer.subarray(4, 12).toString("ascii");
+    const validFtyp = ["ftypmif1", "ftypheic", "ftypheix", "ftypmsf1", "ftypmif2"];
+    return validFtyp.some((f) => ftyp.startsWith(f.substring(0, 4)));
+  }
+
+  return false;
 }
 
 export async function POST(request: NextRequest) {
@@ -93,7 +111,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const filename = generateFilename(photo.name);
+    const filename = generateFilename(photo.name, photo.type);
     const url = await storage.save(user.userId, filename, buffer);
 
     const tags = tagsString
