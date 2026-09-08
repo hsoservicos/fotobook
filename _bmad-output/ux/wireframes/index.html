@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FotoBook — Wireframes</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #262626; }
+    
+    .container { max-width: 1280px; margin: 0 auto; padding: 2rem; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    .subtitle { color: #737373; margin-bottom: 2rem; }
+    
+    .nav { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .nav a { 
+      padding: 0.5rem 1rem; 
+      background: white; 
+      border: 1px solid #e5e7eb; 
+      border-radius: 8px; 
+      text-decoration: none; 
+      color: #262626;
+      transition: all 0.2s;
+    }
+    .nav a:hover, .nav a.active { background: #2563eb; color: white; border-color: #2563eb; }
+    
+    .screen { 
+      display: none; 
+      background: white; 
+      border-radius: 16px; 
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      overflow: hidden;
+    }
+    .screen.active { display: block; }
+    
+    .screen-header { 
+      padding: 1rem 1.5rem; 
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .screen-header h2 { font-size: 1.25rem; }
+    
+    .screen-body { padding: 2rem; }
+    
+    /* Home Screen */
+    .hero { 
+      text-align: center; 
+      padding: 4rem 2rem; 
+      background: linear-gradient(135deg, #eff6ff, #fafafa);
+      border-radius: 16px;
+      margin-bottom: 2rem;
+    }
+    .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+    .hero p { font-size: 1.125rem; color: #737373; max-width: 600px; margin: 0 auto 2rem; }
+    .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn { 
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 1rem 2rem; border-radius: 12px; font-weight: 600;
+      text-decoration: none; font-size: 1.125rem; transition: all 0.2s;
+    }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; transform: translateY(-2px); }
+    .btn-secondary { background: white; color: #262626; border: 1px solid #e5e7eb; }
+    .btn-secondary:hover { border-color: #d1d5db; background: #fafafa; }
+    
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+    .feature { 
+      background: white; border: 1px solid #e5e7eb; border-radius: 12px; 
+      padding: 1.5rem; text-align: center; transition: all 0.2s;
+    }
+    .feature:hover { border-color: #93c5fd; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+    .feature-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .feature h3 { font-size: 1.125rem; margin-bottom: 0.5rem; }
+    .feature p { font-size: 0.875rem; color: #737373; }
+    
+    /* Upload Screen */
+    .dropzone { 
+      border: 2px dashed #d1d5db; border-radius: 16px; padding: 3rem; 
+      text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 2rem;
+    }
+    .dropzone:hover { border-color: #3b82f6; background: #eff6ff; }
+    .dropzone-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .dropzone h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+    .dropzone p { color: #737373; font-size: 0.875rem; }
+    
+    .queue { display: flex; flex-direction: column; gap: 1rem; }
+    .queue-item { 
+      display: flex; gap: 1rem; padding: 1rem; 
+      background: #fafafa; border: 1px solid #e5e7eb; border-radius: 12px;
+    }
+    .queue-thumb { 
+      width: 96px; height: 96px; border-radius: 8px; 
+      background: #e5e7eb; display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; flex-shrink: 0;
+    }
+    .queue-info { flex: 1; }
+    .queue-info h4 { font-size: 0.875rem; margin-bottom: 0.25rem; }
+    .queue-info p { font-size: 0.75rem; color: #737373; margin-bottom: 0.5rem; }
+    .queue-input { 
+      width: 100%; padding: 0.5rem; border: 1px solid #e5e7eb; 
+      border-radius: 6px; font-size: 0.875rem; margin-bottom: 0.5rem;
+    }
+    .progress { height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: #2563eb; border-radius: 3px; transition: width 0.3s; }
+    
+    /* Gallery Screen */
+    .controls { 
+      display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; 
+      align-items: center;
+    }
+    .search { 
+      flex: 1; min-width: 200px; padding: 0.75rem 1rem; 
+      border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.875rem;
+    }
+    .sort { 
+      padding: 0.75rem; border: 1px solid #e5e7eb; 
+      border-radius: 8px; font-size: 0.875rem; background: white;
+    }
+    .view-btns { display: flex; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+    .view-btn { 
+      padding: 0.75rem 1rem; border: none; background: white; 
+      cursor: pointer; font-size: 1rem; transition: all 0.2s;
+    }
+    .view-btn.active { background: #2563eb; color: white; }
+    
+    .tags { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .tag { 
+      padding: 0.375rem 0.875rem; border-radius: 9999px; font-size: 0.75rem;
+      background: #f3f4f6; color: #374151; cursor: pointer; transition: all 0.2s;
+    }
+    .tag:hover, .tag.active { background: #2563eb; color: white; }
+    
+    .gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+    .photo { 
+      aspect-ratio: 1; border-radius: 12px; overflow: hidden; 
+      background: #e5e7eb; cursor: pointer; position: relative; transition: all 0.3s;
+    }
+    .photo:hover { transform: scale(1.02); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+    .photo-overlay { 
+      position: absolute; bottom: 0; left: 0; right: 0; 
+      background: linear-gradient(transparent, rgb(0 0 0 / 0.7));
+      padding: 1rem; color: white; opacity: 0; transition: opacity 0.3s;
+    }
+    .photo:hover .photo-overlay { opacity: 1; }
+    .photo-overlay h4 { font-size: 0.875rem; }
+    .photo-overlay p { font-size: 0.75rem; color: rgb(255 255 255 / 0.7); }
+    
+    /* Lightbox */
+    .lightbox { 
+      display: none; position: fixed; inset: 0; background: rgb(0 0 0 / 0.95);
+      z-index: 50; align-items: center; justify-content: center;
+    }
+    .lightbox.active { display: flex; }
+    .lightbox-close { 
+      position: absolute; top: 1rem; right: 1rem; 
+      background: none; border: none; color: white; font-size: 2rem; cursor: pointer;
+    }
+    .lightbox-content { 
+      display: flex; max-width: 1200px; max-height: 90vh; 
+      margin: 1rem; gap: 1rem;
+    }
+    .lightbox-image { 
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      background: #262626; border-radius: 8px; min-width: 0;
+    }
+    .lightbox-image img { max-width: 100%; max-height: 80vh; object-fit: contain; }
+    .lightbox-info { 
+      width: 320px; background: #171717; color: white; 
+      padding: 1.5rem; border-radius: 8px; overflow-y: auto;
+    }
+    .lightbox-info h3 { font-size: 1.125rem; margin-bottom: 1rem; }
+    .lightbox-info dt { color: #a3a3a3; font-size: 0.75rem; margin-top: 1rem; }
+    .lightbox-info dd { font-size: 0.875rem; margin-bottom: 0.5rem; }
+    .lightbox-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .lightbox-tag { 
+      background: #404040; color: white; padding: 0.25rem 0.75rem; 
+      border-radius: 9999px; font-size: 0.75rem;
+    }
+    .lightbox-actions { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .lightbox-btn { 
+      display: block; width: 100%; padding: 0.75rem; border-radius: 8px;
+      text-align: center; text-decoration: none; font-weight: 500; transition: all 0.2s;
+    }
+    .lightbox-btn-primary { background: #2563eb; color: white; }
+    .lightbox-btn-primary:hover { background: #1d4ed8; }
+    .lightbox-btn-secondary { background: #404040; color: white; }
+    .lightbox-btn-secondary:hover { background: #525252; }
+    
+    @media (max-width: 768px) {
+      .gallery { grid-template-columns: repeat(2, 1fr); }
+      .lightbox-content { flex-direction: column; }
+      .lightbox-info { width: 100%; max-height: 30vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📸 FotoBook — Wireframes</h1>
+    <p class="subtitle">Mockups interativos das principais telas</p>
+    
+    <nav class="nav">
+      <a href="#" class="active" onclick="showScreen('home')">Home</a>
+      <a href="#" onclick="showScreen('upload')">Upload</a>
+      <a href="#" onclick="showScreen('gallery')">Galeria</a>
+      <a href="#" onclick="showLightbox()">Lightbox</a>
+    </nav>
+    
+    <!-- Home Screen -->
+    <div id="home" class="screen active">
+      <div class="screen-header">
+        <h2>📷 FotoBook</h2>
+        <span style="color: #737373; font-size: 0.875rem;">/ (Home)</span>
+      </div>
+      <div class="screen-body">
+        <div class="hero">
+          <h1>Olá, <span style="color: #2563eb;">Vânia</span>! 👋</h1>
+          <p>Seu espaço pessoal para registrar e organizar suas fotos favoritas. Upload simples e direto — sem complicação.</p>
+          <div class="hero-btns">
+            <a href="#" class="btn btn-primary" onclick="showScreen('upload')">📤 Enviar Fotos</a>
+            <a href="#" class="btn btn-secondary" onclick="showScreen('gallery')">🖼️ Ver Galeria</a>
+          </div>
+        </div>
+        
+        <div class="features">
+          <div class="feature">
+            <div class="feature-icon">📤</div>
+            <h3>Upload Fácil</h3>
+            <p>Arraste e solte ou clique. Suporta múltiplos arquivos de uma vez.</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">🏷️</div>
+            <h3>Organize</h3>
+            <p>Adicione descrições, tags e organize em albums.</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">🔍</div>
+            <h3>Encontre</h3>
+            <p>Busca inteligente por data, tags ou descrição.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Upload Screen -->
+    <div id="upload" class="screen">
+      <div class="screen-header">
+        <h2>📤 Enviar Fotos</h2>
+        <span style="color: #737373; font-size: 0.875rem;">/upload</span>
+      </div>
+      <div class="screen-body">
+        <div class="dropzone">
+          <div class="dropzone-icon">📷</div>
+          <h3>Arraste fotos aqui ou clique para selecionar</h3>
+          <p>JPG, PNG, GIF, WEBP • Até 10MB cada • Múltiplos arquivos</p>
+        </div>
+        
+        <div class="queue">
+          <div class="queue-item">
+            <div class="queue-thumb">🌅</div>
+            <div class="queue-info">
+              <h4>praia-sunset.jpg</h4>
+              <p>3.2 MB</p>
+              <input type="text" class="queue-input" placeholder="Descrição (opcional)" value="Pôr do sol na praia">
+              <input type="text" class="queue-input" placeholder="Tags (separadas por vírgula)" value="praia, pôr-do-sol, natureza">
+            </div>
+          </div>
+          
+          <div class="queue-item">
+            <div class="queue-thumb">👨‍👩‍👧</div>
+            <div class="queue-info">
+              <h4>familia-praia.jpg</h4>
+              <p>4.1 MB</p>
+              <input type="text" class="queue-input" placeholder="Descrição (opcional)" value="Família na praia">
+              <div class="progress"><div class="progress-fill" style="width: 65%"></div></div>
+              <p style="margin-top: 0.25rem; font-size: 0.75rem; color: #2563eb;">Enviando... 65%</p>
+            </div>
+          </div>
+          
+          <div class="queue-item" style="border-color: #22c55e; background: #f0fdf4;">
+            <div class="queue-thumb" style="background: #22c55e; color: white;">✓</div>
+            <div class="queue-info">
+              <h4>restaurante.jpg</h4>
+              <p>2.8 MB</p>
+              <p style="color: #16a34a; font-size: 0.875rem;">✓ Enviada com sucesso!</p>
+            </div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 1.5rem;">
+          <button class="btn btn-primary" style="width: 100%;">📤 Enviar 3 Fotos</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Gallery Screen -->
+    <div id="gallery" class="screen">
+      <div class="screen-header">
+        <h2>🖼️ Minha Galeria</h2>
+        <span style="color: #737373; font-size: 0.875rem;">/galeria</span>
+      </div>
+      <div class="screen-body">
+        <div class="controls">
+          <input type="text" class="search" placeholder="🔍 Buscar fotos...">
+          <select class="sort">
+            <option>Mais recentes</option>
+            <option>Mais antigas</option>
+            <option>Nome</option>
+            <option>Tamanho</option>
+          </select>
+          <div class="view-btns">
+            <button class="view-btn active">⊞</button>
+            <button class="view-btn">⊟</button>
+            <button class="view-btn">☰</button>
+          </div>
+        </div>
+        
+        <div class="tags">
+          <span class="tag active">Todas</span>
+          <span class="tag">#viagem</span>
+          <span class="tag">#praia</span>
+          <span class="tag">#família</span>
+          <span class="tag">#natureza</span>
+          <span class="tag">#comida</span>
+        </div>
+        
+        <div class="gallery">
+          <div class="photo" onclick="showLightbox()">
+            <div class="photo-overlay">
+              <h4>Pôr do sol na praia</h4>
+              <p>12 set 2026</p>
+            </div>
+          </div>
+          <div class="photo">
+            <div class="photo-overlay">
+              <h4>Família no restaurante</h4>
+              <p>11 set 2026</p>
+            </div>
+          </div>
+          <div class="photo">
+            <div class="photo-overlay">
+              <h4>Paisagem da serra</h4>
+              <p>10 set 2026</p>
+            </div>
+          </div>
+          <div class="photo">
+            <div class="photo-overlay">
+              <h4>Cachorro dormindo</h4>
+              <p>09 set 2026</p>
+            </div>
+          </div>
+          <div class="photo">
+            <div class="photo-overlay">
+              <h4>Flores do jardim</h4>
+              <p>08 set 2026</p>
+            </div>
+          </div>
+          <div class="photo">
+            <div class="photo-overlay">
+              <h4>Céu estrelado</h4>
+              <p>07 set 2026</p>
+            </div>
+          </div>
+          <div class="photo">
+            <div class="photo-overlay">
+              <h4>Praia deBoa Viagem</h4>
+              <p>06 set 2026</p>
+            </div>
+          </div>
+          <div class="photo">
+            <div class="photo-overlay">
+              <h4>Barco no porto</h4>
+              <p>05 set 2026</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Lightbox Modal -->
+  <div id="lightbox" class="lightbox">
+    <button class="lightbox-close" onclick="hideLightbox()">✕</button>
+    <div class="lightbox-content">
+      <div class="lightbox-image">
+        <div style="width: 600px; height: 400px; background: #404040; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #a3a3a3;">
+          📷 Foto Ampliada
+        </div>
+      </div>
+      <div class="lightbox-info">
+        <h3>Pôr do sol na praia</h3>
+        
+        <dl>
+          <dt>Arquivo</dt>
+          <dd>praia-sunset.jpg</dd>
+          
+          <dt>Data</dt>
+          <dd>12 set 2026, 18:30</dd>
+          
+          <dt>Tamanho</dt>
+          <dd>3.2 MB</dd>
+          
+          <dt>Dimensões</dt>
+          <dd>4032 × 3024</dd>
+          
+          <dt>Câmera</dt>
+          <dd>iPhone 15 Pro</dd>
+          
+          <dt>Tags</dt>
+        </dl>
+        <div class="lightbox-tags">
+          <span class="lightbox-tag">#viagem</span>
+          <span class="lightbox-tag">#praia</span>
+          <span class="lightbox-tag">#pôr-do-sol</span>
+        </div>
+        
+        <div class="lightbox-actions">
+          <a href="#" class="lightbox-btn lightbox-btn-primary">📥 Download</a>
+          <a href="#" class="lightbox-btn lightbox-btn-secondary">🔗 Copiar Link</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.nav a').forEach(a => a.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+    
+    function showLightbox() {
+      document.getElementById('lightbox').classList.add('active');
+    }
+    
+    function hideLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+    }
+    
+    document.getElementById('lightbox').addEventListener('click', function(e) {
+      if (e.target === this) hideLightbox();
+    });
+    
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') hideLightbox();
+    });
+  </script>
+</body>
+</html>

@@ -180,6 +180,9 @@ export default function UploadPage() {
         });
 
         xhr.open("POST", "/api/upload");
+        const saved = localStorage.getItem("auth");
+        const token = saved ? JSON.parse(saved).token : "";
+        if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
         xhr.send(formData);
       });
 

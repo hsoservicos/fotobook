@@ -38,7 +38,11 @@ export default function GaleriaPage() {
   const fetchPhotos = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/photos");
+      const saved = localStorage.getItem("auth");
+      const token = saved ? JSON.parse(saved).token : "";
+      const response = await fetch("/api/photos", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const result = await response.json();
 
       if (response.ok) {

@@ -1,29 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readdir, readFile } from "fs/promises";
-import { existsSync } from "fs";
-import path from "path";
-
-interface PhotoMetadata {
-  id: string;
-  filename: string;
-  originalName: string;
-  description: string;
-  tags: string[];
-  uploadedAt: string;
-  size: number;
-  mimeType: string;
-  width?: number;
-  height?: number;
-  isPublic: boolean;
-  isFavorite: boolean;
-}
-
-const METADATA_DIR = path.join(process.cwd(), "public", "uploads", "metadata");
+import { db } from "@/lib/db";
+import { getUserFromRequest } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    if (!existsSync(METADATA_DIR)) {
-      return NextResponse.json({ photos: [], total: 0 });
+    const user = getUserFromRequest(request);
+    if (!user) {
+      return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -32,91 +15,55 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get("sort") || "newest";
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || "50", 10);
+    const albumId = searchParams.get("albumId");
 
-    const files = await readdir(METADATA_DIR);
-    const metadataFiles = files.filter((file) => file.endsWith(".json"));
+    const where: Record<string, unknown> = { userId: user.userId };
+    if (albumId) where.albumId = albumId;
 
-    const photos: (PhotoMetadata & { url: string })[] = [];
-
-    for (const file of metadataFiles) {
-      try {
-        const filePath = path.join(METADATA_DIR, file);
-        const content = await readFile(filePath, "utf-8");
-        const metadata: PhotoMetadata = JSON.parse(content);
-
-        // Verificar se o arquivo de imagem existe
-        const imagePath = path.join(
-          process.cwd(),
-          "public",
-          "uploads",
-          metadata.filename
-        );
-
-        if (!existsSync(imagePath)) continue;
-
-        // Filtro por busca
-        if (search) {
-          const matchesSearch =
-            metadata.description.toLowerCase().includes(search) ||
-            metadata.originalName.toLowerCase().includes(search) ||
-            metadata.tags.some((t) => t.toLowerCase().includes(search));
-          if (!matchesSearch) continue;
-        }
-
-        // Filtro por tag
-        if (tag) {
-          const matchesTag = metadata.tags.some((t) =>
-            t.toLowerCase().includes(tag)
-          );
-          if (!matchesTag) continue;
-        }
-
-        photos.push({
-          ...metadata,
-          url: `/uploads/${metadata.filename}`,
-        });
-      } catch {
-        // Ignorar arquivos de metadados corrompidos
-        continue;
-      }
-    }
-
-    // Ordenação
-    photos.sort((a, b) => {
-      switch (sortBy) {
-        case "oldest":
-          return (
-            new Date(a.uploadedAt).getTime() -
-            new Date(b.uploadedAt).getTime()
-          );
-        case "name":
-          return a.originalName.localeCompare(b.originalName);
-        case "size":
-          return b.size - a.size;
-        case "newest":
-        default:
-          return (
-            new Date(b.uploadedAt).getTime() -
-            new Date(a.uploadedAt).getTime()
-          );
-      }
+    const photos = await db.photo.findMany({
+      where,
+      orderBy:
+        sortBy === "oldest"
+          ? { uploadedAt: "asc" }
+          : sortBy === "name"
+            ? { originalName: "asc" }
+            : sortBy === "size"
+              ? { size: "desc" }
+              : { uploadedAt: "desc" },
+      skip: (page - 1) * limit,
+      take: limit,
     });
 
-    const total = photos.length;
+    // Apply client-side filters for search/tag since Prisma doesn't do full-text on arrays easily
+    let filtered = photos;
+    if (search) {
+      filtered = filtered.filter(
+        (p) =>
+          p.description.toLowerCase().includes(search) ||
+          p.originalName.toLowerCase().includes(search) ||
+          p.tags.some((t) => t.toLowerCase().includes(search))
+      );
+    }
+    if (tag) {
+      filtered = filtered.filter((p) =>
+        p.tags.some((t) => t.toLowerCase().includes(tag))
+      );
+    }
 
-    // Paginação
-    const offset = (page - 1) * limit;
-    const paginatedPhotos = photos.slice(offset, offset + limit);
+    const total = await db.photo.count({ where });
 
     return NextResponse.json({
-      photos: paginatedPhotos,
+      photos: filtered.map((p) => ({
+        ...p,
+        url: `/uploads/${p.userId}/${p.filename}`,
+      })),
       total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error("Erro ao listar fotos:", error);
+    console.error("List photos error:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor." },
       { status: 500 }
